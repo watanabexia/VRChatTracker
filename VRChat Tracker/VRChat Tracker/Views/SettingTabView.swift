@@ -19,7 +19,18 @@ struct SettingTabView: View {
                         Text("logout")
                     })
                 }, header: {
-                    Text("System")
+                    Text("system")
+                })
+                
+                Section(content: {
+                    Button(action: nothing, label: {
+                        Text("contribute on GitHub")
+                    })
+                    Button(action: nothing, label: {
+                        Text("support us!")
+                    })
+                }, header: {
+                    Text("about")
                 })
             }
             .navigationTitle("Setting")

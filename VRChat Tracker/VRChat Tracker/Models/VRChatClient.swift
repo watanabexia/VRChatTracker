@@ -96,8 +96,12 @@ class VRChatClient: ObservableObject {
     static func createPreview() -> VRChatClient {
         let client_preview = VRChatClient(autoLogin: false)
         
-        client_preview.user = try! JSONDecoder().decode(User.self, from: userPreview.data(using: .utf8)!)
+        client_preview.user = PreviewData.load(name: "UserPreview")
         
         return client_preview
     }
+}
+
+func nothing() {
+    
 }

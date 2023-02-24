@@ -11,20 +11,12 @@ import SwiftVRChatAPI
 struct ProfileTabView: View {
     @ObservedObject var client: VRChatClient
     
-    let displayName: String
-    let username: String
-    let currentAvatarImageUrl: String
-    let tags: [String]
-    let bio: String
+    let user:User
     
     init(client: VRChatClient) {
         self.client = client
         
-        self.displayName = client.user!.displayName!
-        self.username = client.user!.username!
-        self.currentAvatarImageUrl = client.user!.currentAvatarImageUrl!
-        self.tags = client.user!.tags!
-        self.bio = client.user!.bio!
+        self.user = client.user!
         
         // https://stackoverflow.com/questions/69325928/swiftui-size-to-fit-or-word-wrap-navigation-title
         UILabel.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).adjustsFontSizeToFitWidth = true
@@ -33,14 +25,7 @@ struct ProfileTabView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                HStack {
-                    Text("@\(username)")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-                
-                AsyncImage(url: URL(string: currentAvatarImageUrl)) { image in
+                AsyncImage(url: URL(string: user.currentAvatarImageUrl!)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -48,40 +33,54 @@ struct ProfileTabView: View {
                     ProgressView()
                 }
                 
-                HStack {
-                    ForEach(tags, id: \.self) { tag in
-                        if (tag.starts(with: "language")) {
+                VStack {
+                    AsyncImage(url: URL(string: user.userIcon!)) { image in
+                            image
+                            .resizable()
+                            .frame(width: 200, height: 200)
+                            .clipShape(Circle())
+                            .overlay {
+                                Circle().stroke(.white, lineWidth: 4)
+                            }
+                            .shadow(radius: 7)
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    
+                    Text("\(user.state!)")
+                    
+                    HStack {
+                        ForEach(user.tags!, id: \.self) { tag in
+                            if (tag.starts(with: "language")) {
+                                Button(action: nothing) {
+                                    Text(tag.suffix(3).uppercased())
+                                }
+                            }
+                        }
+                        if (user.tags!.count < 4) {
                             Button(action: nothing) {
-                                Text(tag.suffix(3).uppercased())
+                                Image(systemName: "plus.circle")
                             }
                         }
                     }
-                    if (tags.count < 4) {
-                        Button(action: nothing) {
-                            Image(systemName: "plus.circle")
-                        }
+                    
+                    HStack {
+                        Text(user.bio!)
+                            .multilineTextAlignment(.leading)
+                        .padding(.top)
+                        
+                        Spacer()
                     }
-                }
-                
-                HStack {
-                    Text(bio)
-                        .multilineTextAlignment(.leading)
-                    .padding(.top)
                     
                     Spacer()
                 }
-                
-                Spacer()
+                .offset(y: -100)
             }
             .padding(.horizontal, 10.0)
-            .navigationTitle(displayName)
+            .navigationTitle(user.displayName!)
             
         }
     }
-}
-
-func nothing() {
-    
 }
 
 struct ProfileTabView_Previews: PreviewProvider {
