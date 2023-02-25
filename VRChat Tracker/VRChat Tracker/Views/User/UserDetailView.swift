@@ -9,10 +9,13 @@ import SwiftUI
 import SwiftVRChatAPI
 
 struct UserDetailView: View {
+    @ObservedObject var client: VRChatClient
+    
     let user:User
     
-    init(user: User) {
+    init(client: VRChatClient, user: User) {
         
+        self.client = client
         self.user = user
         
         // https://stackoverflow.com/questions/69325928/swiftui-size-to-fit-or-word-wrap-navigation-title
@@ -81,6 +84,27 @@ struct UserDetailView: View {
                         Spacer()
                     }
                     
+                    HStack {
+                        Button(action: {
+                            if client.isFollowed(user: user) {
+                                client.removeFollowedUserID(user: user)
+                            } else {
+                                client.addFollowedUserID(user: user)
+                            }
+                        }, label: {
+                            if client.isFollowed(user: user) {
+                                Text("Unfollow")
+                                    .bold()
+                            } else {
+                                Text("Follow")
+                            }
+                        })
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(client.isFollowed(user: user) ? Color.red : Color.blue)
+                        .clipShape(Capsule())
+                    }
+                    
                     Spacer()
                 }
                 .padding(.horizontal, 10.0)
@@ -96,6 +120,6 @@ struct UserDetailView: View {
 
 struct UserDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        UserDetailView(user: PreviewData.load(name: "UserPreview")!)
+        UserDetailView(client: VRChatClient.createPreview(), user: PreviewData.load(name: "UserPreview")!)
     }
 }

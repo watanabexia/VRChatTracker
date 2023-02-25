@@ -20,17 +20,17 @@ struct FriendTabView: View {
             List {
                 if let onlineFriends = client.onlineFriends {
                     Section("Online Friends") {
-                        FriendRowView(friends: onlineFriends)
+                        FriendRowView(client: client, friends: onlineFriends)
                     }
                 }
                 if let activeFriends = client.activeFriends {
                     Section("Active Friends") {
-                        FriendRowView(friends: activeFriends)
+                        FriendRowView(client: client, friends: activeFriends)
                     }
                 }
                 if let offlineFriends = client.offlineFriends {
                     Section("Offline Friends") {
-                        FriendRowView(friends: offlineFriends)
+                        FriendRowView(client: client, friends: offlineFriends)
                     }
                 }
             }
@@ -41,7 +41,7 @@ struct FriendTabView: View {
                 LazyVStack {
                     ForEach(searchResults) { friend in
                         NavigationLink {
-                            UserDetailView(user: friend.user)
+                            UserDetailView(client: client, user: friend.user)
                         } label: {
                             UserView(user: friend.user, world: friend.world, instance: friend.instance)
                                 .cornerRadius(10)
@@ -81,6 +81,7 @@ struct FriendTabView: View {
 }
 
 struct FriendRowView: View {
+    @ObservedObject var client: VRChatClient
     let friends: [Friend]
     
     var body: some View {
@@ -88,7 +89,7 @@ struct FriendRowView: View {
             LazyHStack(spacing: 5) {
                 ForEach(friends.sorted{ $0.user.displayName! < $1.user.displayName! }) { friend in
                     NavigationLink {
-                        UserDetailView(user: friend.user)
+                        UserDetailView(client: client, user: friend.user)
                     } label: {
                         UserView(user: friend.user, world: friend.world, instance: friend.instance)
                             .cornerRadius(10)

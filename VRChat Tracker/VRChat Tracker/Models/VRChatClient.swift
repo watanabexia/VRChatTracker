@@ -23,8 +23,11 @@ class VRChatClient: ObservableObject {
     @Published var activeFriends: [Friend]?
     @Published var offlineFriends: [Friend]?
     
+    @Published var followedUserIDs:[String]?
     
     var apiClient = APIClient()
+    
+    let defaults = UserDefaults.standard
     
     init(autoLogin: Bool = true) {
         // Fetch the currently available cookies
@@ -49,6 +52,7 @@ class VRChatClient: ObservableObject {
                 // If already successfully logged in
                 if (self.user?.displayName != nil) {
                     self.isLoggedIn = true
+                    self.readFollowedUserIDs()
                 } else if (self.user?.requiresTwoFactorAuth == ["emailOtp"]) {
                     self.isLoggedIn = false
                     self.is2FA = true
@@ -85,6 +89,7 @@ class VRChatClient: ObservableObject {
         self.is2FA = false
         self.isAutoLoggingIn = false
         self.user = nil
+        self.followedUserIDs = nil
     }
     
     //
@@ -146,11 +151,40 @@ class VRChatClient: ObservableObject {
         }
     }
     
-//    func updateFriendsGroup(friends: [String]) {
-//        for userID in friends {
-//            UserAPI.
-//        }
-//    }
+    //
+    // MARK: Followed Friends
+    //
+    
+    func readFollowedUserIDs() {
+        defaults.register(defaults: ["followedUsersID-\(self.user!.id!)":[]])
+        self.followedUserIDs = (defaults.object(forKey: "followedUsersID-\(self.user!.id!)") as! [String])
+    }
+    
+    func addFollowedUserID(user: User) {
+        followedUserIDs!.append(user.id!)
+        defaults.set(followedUserIDs, forKey: "followedUsersID-\(self.user!.id!)")
+        
+        //Debug
+//        print("** add follow **")
+//        print(followedUserIDs)
+        //Debug Ends
+    }
+    
+    func removeFollowedUserID(user: User) {
+        if let idx = followedUserIDs!.firstIndex(where: {$0 == user.id}) {
+            followedUserIDs!.remove(at: idx)
+        }
+        defaults.set(followedUserIDs, forKey: "followedUsersID-\(self.user!.id!)")
+        
+        //Debug
+//        print("** remove follow **")
+//        print(followedUserIDs)
+        //Debug Ends
+    }
+    
+    func isFollowed(user: User) -> Bool {
+        return followedUserIDs!.contains(user.id!)
+    }
     
     /**
      Create a sample `VRChatClient` instance for preview.
